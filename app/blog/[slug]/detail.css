@@ -1,0 +1,19 @@
+.blog-detail {
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+}
+.blog-detail img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+.blog-detail h1 {
+  margin-bottom: 1rem;
+}
+.blog-detail p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
