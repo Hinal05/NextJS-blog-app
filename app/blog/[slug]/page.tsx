@@ -1,36 +1,33 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { posts } from "@/library/posts";
 
 export async function generateStaticParams() {
-  const res = await fetch("http://localhost:3000/api/posts", {
-    cache: "force-cache", // allow static generation
-  });
-
-  const posts = await res.json();
-
-  return posts.map((post: any) => ({
+  return posts.map((post) => ({
     slug: post.slug,
   }));
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const res = await fetch(`http://localhost:3000/api/posts/${params.slug}`, {
-    cache: "force-cache", // enables SSG
-  });
-
-  if (!res.ok) notFound();
-
-  const post = await res.json();
-
+  const post = posts.find((p) => p.slug === params.slug); // ✅ okay now
+  if (!post) return notFound();
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <Breadcrumbs postTitle={post.title} />
       <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
       <div className="text-sm text-gray-600 mb-2">
-        By <span className="font-medium">{post.author}</span> |{" "}
-        <span>{new Date(post.createdDate).toLocaleDateString()}</span>
+        {" "}
+        <Link
+          href={`/authors/${post.authorId}`}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          {post.author}
+        </Link>{" "}
+        | <span>{new Date(post.createdDate).toLocaleDateString()}</span>
       </div>
+
       <Image
         src={post.image}
         alt={post.title}

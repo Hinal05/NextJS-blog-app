@@ -1,10 +1,9 @@
-// For Bundle analyzer.
+// next.config.js
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-// For dynamic lazyloading.
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     domains: [
@@ -12,10 +11,12 @@ const nextConfig = {
       "redux.js.org",
       "upload.wikimedia.org",
       "cdn.freelogovectors.net",
-      "encrypted-tbn0.gstatic.com", // 👈 this is the missing one
-      "https://plus.unsplash.com"
+      "encrypted-tbn0.gstatic.com",
+      "plus.unsplash.com",
+      "via.placeholder.com", // keep if still using
+      "placehold.co",        // ✅ add this line
     ],
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

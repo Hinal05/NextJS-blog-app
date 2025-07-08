@@ -30,12 +30,7 @@ export default function AddBlogPage() {
       tags: formData.tags.split(',').map(tag => tag.trim()),
     };
 
-    // Optional: Persist to server
-    await fetch('/api/posts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPost),
-    });
+    console.log('New post:', newPost);
 
     // Redirect back to blog list
     router.push('/blog');

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -7,33 +8,6 @@ export default function BlogList({ posts: initialPosts }: { posts: any[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPosts, setFilteredPosts] = useState(initialPosts);
   const [posts, setPosts] = useState(initialPosts);
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    image: "",
-    author: "",
-    tags: "",
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const newPost = {
-      ...formData,
-      slug: formData.title.trim().toLowerCase().replace(/\s+/g, "-"),
-      createdDate: new Date().toISOString(),
-      tags: formData.tags.split(",").map((tag) => tag.trim()),
-    };
-
-    // Optionally: Send to an API here
-    setPosts((prev) => [newPost, ...prev]);
-    setFormData({ title: "", content: "", image: "", author: "", tags: "" });
-  };
 
   useEffect(() => {
     const q = searchQuery.toLowerCase();
@@ -66,22 +40,27 @@ export default function BlogList({ posts: initialPosts }: { posts: any[] }) {
       ) : (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
           {filteredPosts.map((post) => (
-            <a
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="block bg-white p-4 rounded shadow hover:scale-105 transition"
-            >
-              <img
-                src={post.image}
-                alt={post.title}
-                loading="lazy"
-                className="w-full h-40 object-contain mb-4"
-              />
-              <h3 className="text-lg font-semibold">{post.title}</h3>
+            <div key={post.slug} className="block bg-white p-4 rounded shadow hover:scale-105 transition">
+              <a
+                href={`/blog/${post.slug}`}
+              >
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  loading="lazy"
+                  className="w-full h-40 object-contain mb-4"
+                />
+                <h3 className="text-lg font-semibold">{post.title}</h3>
+                <p className="text-sm text-gray-600">
+                  {post.content.slice(0, 60)}...
+                </p>
+              </a>
               <p className="text-sm text-gray-600">
-                {post.content.slice(0, 60)}...
+                <Link href={`/authors/${post.authorId}`} className="text-blue-600 hover:underline">
+                  {post.author}
+                </Link>
               </p>
-            </a>
+            </div>
           ))}
         </div>
       )}
