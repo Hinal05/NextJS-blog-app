@@ -30,8 +30,6 @@ export default function AddBlogPage() {
       tags: formData.tags.split(',').map(tag => tag.trim()),
     };
 
-    console.log('New post:', newPost);
-
     // Redirect back to blog list
     router.push('/blog');
   };

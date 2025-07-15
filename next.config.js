@@ -6,16 +6,8 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   images: {
-    domains: [
-      "cdn-icons-png.flaticon.com",
-      "redux.js.org",
-      "upload.wikimedia.org",
-      "cdn.freelogovectors.net",
-      "encrypted-tbn0.gstatic.com",
-      "plus.unsplash.com",
-      "via.placeholder.com", // keep if still using
-      "placehold.co",        // ✅ add this line
-    ],
+    domains: ['drupal-decoupled.ddev.site'],
+    domains: ['127.0.0.1'],
   },
 };
 
