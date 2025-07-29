@@ -47,7 +47,7 @@ export async function fetchPosts(): Promise<NormalizedPost[]> {
         (inc: any) => inc.type === 'file--file' && inc.id === imgRel?.id
       );
       const image = imgObj
-        ? `https://drupal-decoupled.ddev.site:33001${imgObj.attributes.uri.url}`
+        ? `${apiBase}/${imgObj.attributes.uri.url}`
         : '';
 
       // Tags
@@ -167,7 +167,7 @@ export async function fetchPostsByAuthor(authorId: string) {
         (i: any) => i.type === "file--file" && i.id === imgRel?.id
       );
       const image = imgObj
-        ? `https://drupal-decoupled.ddev.site:33001${imgObj.attributes.uri.url}`
+        ? `${process.env.DRUPAL_API_URL}/${imgObj.attributes.uri.url}`
         : "";
 
       // Tags
@@ -230,3 +230,67 @@ export async function fetchPostsByAuthor(authorId: string) {
 //     return false;
 //   }
 // }
+
+// lib/api.ts
+
+export async function registerUser(username: string, email: string, password: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const apiBase = process.env.NEXT_PUBLIC_DRUPAL_API_URL;
+    const res = await fetch(`${apiBase}/jsonapi/user/user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Authorization: 'Basic ' + btoa('admin:admin_password'), // Replace with env-secured credentials
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'user--user',
+          attributes: {
+            name: username,
+            mail: email,
+            pass: password,
+            status: true,
+          },
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        success: false,
+        message: error?.errors?.[0]?.detail || 'Registration failed',
+      };
+    }
+
+    return { success: true, message: 'User registered successfully' };
+  } catch (err) {
+    console.error('Register error:', err);
+    return { success: false, message: 'Unexpected error occurred during registration.' };
+  }
+}
+
+export async function loginUser(username: string, password: string): Promise<{ success: boolean; token?: string; message: string }> {
+  try {
+    const apiBase = process.env.NEXT_PUBLIC_DRUPAL_API_URL;
+    const res = await fetch(`${apiBase}/user/login?_format=json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: username, pass: password }),
+    });
+
+    if (!res.ok) {
+      return { success: false, message: 'Invalid credentials' };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      token: data.csrf_token,
+      message: 'Login successful',
+    };
+  } catch (err) {
+    console.error('Login error:', err);
+    return { success: false, message: 'Unexpected error occurred during login.' };
+  }
+}

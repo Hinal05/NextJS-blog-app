@@ -1,10 +1,11 @@
 import Breadcrumbs from "@/components/Breadcrumbs"; // adjust the path if needed
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function AboutPage() {
   return (
-    <div>
+    <ProtectedRoute>
       <Breadcrumbs />
       <h2>About Us</h2>
-    </div>
+    </ProtectedRoute>
   );
 }
