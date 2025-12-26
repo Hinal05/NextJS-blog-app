@@ -199,39 +199,75 @@ export async function fetchPostsByAuthor(authorId: string) {
   }
 }
 
+export async function createBlogPost({
+  title,
+  content,
+  image,
+}: {
+  title: string;
+  content: string;
+  image?: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+      debugger;
+    console.log(localStorage, 'localStorage');
+    const apiBase = process.env.NEXT_PUBLIC_DRUPAL_API_URL;
+    const csrfToken = localStorage.getItem('csrf_token');
+    const username = localStorage.getItem('username');
 
-// export async function createBlogPost(title: string, content: string): Promise<boolean> {
-//   const apiBase = process.env.DRUPAL_API_URL;
-//   try {
-//     const res = await fetch(`${apiBase}/jsonapi/node/blog`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/vnd.api+json',
-//       },
-//       body: JSON.stringify({
-//         data: {
-//           type: 'node--blog',
-//           attributes: {
-//             title,
-//             field_body: content,
-//           },
-//         },
-//       }),
-//     });
+    if (!csrfToken || !username) {
+      return { success: false, message: 'Missing CSRF token or user not logged in' };
+    }
 
-//     if (!res.ok) {
-//       console.error('Failed to create blog post:', await res.text());
-//       return false;
-//     }
+    // Get the user ID from Drupal
+    const userRes = await fetch(`${apiBase}/jsonapi/user/user?filter[name]=${username}`);
+    const userJson = await userRes.json();
+    const userId = userJson?.data?.[0]?.id;
 
-//     return true;
-//   } catch (err) {
-//     console.error('Error creating blog post:', err);
-//     return false;
-//   }
-// }
+    if (!userId) {
+      return { success: false, message: 'Failed to retrieve user ID' };
+    }
 
-// lib/api.ts
+    const res = await fetch(`${apiBase}/jsonapi/node/blog`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/vnd.api+json',
+      'X-CSRF-Token': csrfToken,
+    },
+    credentials: 'include', // ✅ Required for cookies
+    body: JSON.stringify({
+      data: {
+        type: 'node--blog',
+        attributes: {
+          title,
+          field_body: content,
+          status: true,
+        },
+        relationships: {
+          uid: {
+            data: {
+              type: 'user--user',
+              id: userId,
+            },
+          },
+        },
+      },
+    }),
+  });
+
+
+    if (!res.ok) {
+      const error = await res.text();
+      console.error('Error creating blog post:', error);
+      return { success: false, message: 'Failed to create blog post' };
+    }
+
+    return { success: true, message: 'Blog post created successfully' };
+  } catch (err) {
+    console.error('Error:', err);
+    return { success: false, message: 'Unexpected error occurred during blog post creation.' };
+  }
+}
 
 export async function registerUser(username: string, email: string, password: string): Promise<{ success: boolean; message: string }> {
   try {
@@ -276,6 +312,7 @@ export async function loginUser(username: string, password: string): Promise<{ s
     const res = await fetch(`${apiBase}/user/login?_format=json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ name: username, pass: password }),
     });
 
@@ -284,6 +321,11 @@ export async function loginUser(username: string, password: string): Promise<{ s
     }
 
     const data = await res.json();
+
+    // ✅ STORE values to localStorage
+    localStorage.setItem('csrf_token', data.csrf_token);
+    localStorage.setItem('username', username);
+
     return {
       success: true,
       token: data.csrf_token,

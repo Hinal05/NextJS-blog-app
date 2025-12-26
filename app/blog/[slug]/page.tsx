@@ -7,24 +7,29 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { fetchPosts } from "@/lib/api";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
+// (Optional) Static generation still works
 // export async function generateStaticParams() {
 //   const posts = await fetchPosts();
 //   return posts.map((post) => ({ slug: post.slug }));
 // }
 
-export default async function BlogPostPage({ params: { slug } }: Props) {
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params;
+
   const posts = await fetchPosts();
   const post = posts.find((p) => p.slug === slug);
+
   if (!post) return notFound();
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <Breadcrumbs postTitle={post.title} />
+
       <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
 
       <div className="text-sm text-gray-600 mb-2">

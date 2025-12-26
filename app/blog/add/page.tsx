@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { createBlogPost } from '@/lib/api';
 
 export default function AddBlogPage() {
   const router = useRouter();
@@ -11,8 +12,6 @@ export default function AddBlogPage() {
     title: '',
     content: '',
     image: '',
-    author: '',
-    tags: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -23,15 +22,17 @@ export default function AddBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newPost = {
-      ...formData,
-      slug: formData.title.trim().toLowerCase().replace(/\s+/g, '-'),
-      createdDate: new Date().toISOString(),
-      tags: formData.tags.split(',').map(tag => tag.trim()),
-    };
+    const result = await createBlogPost({
+      title: formData.title,
+      content: formData.content,
+      image: formData.image,
+    });
 
-    // Redirect back to blog list
-    router.push('/blog');
+    if (result.success) {
+      router.push('/blog');
+    } else {
+      alert(`❌ ${result.message}`);
+    }
   };
 
   return (
@@ -51,26 +52,9 @@ export default function AddBlogPage() {
         />
         <input
           type="text"
-          name="author"
-          placeholder="Author"
-          required
-          value={formData.author}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
           name="image"
           placeholder="Image URL"
           value={formData.image}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="tags"
-          placeholder="Tags (comma-separated)"
-          value={formData.tags}
           onChange={handleChange}
           className="border p-2 rounded"
         />

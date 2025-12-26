@@ -3,16 +3,24 @@ import { fetchAuthorById, fetchPostsByAuthor } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 
-type Props = {
-  params: {
-    id: string;
-  };
+type Post = {
+  slug: string;
+  title: string;
+  content: string;
+  createdDateFormatted: string;
 };
 
-export default async function AuthorPage({ params: { id } }: Props) {
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export default async function AuthorPage({ params }: Props) {
+  const { id } = await params;
+
   const author = await fetchAuthorById(id);
-  console.log("Fetched author:", author);
-  const posts = await fetchPostsByAuthor(id);
+  const posts: Post[] = await fetchPostsByAuthor(id);
 
   if (!author) return <div className="p-8">Author not found.</div>;
 
@@ -25,25 +33,9 @@ export default async function AuthorPage({ params: { id } }: Props) {
         <p className="text-gray-600 mb-2">Username: {author.username}</p>
         <p className="text-gray-600 mb-4">Email: {author.email}</p>
 
-        {author.image ? (
-          <Image
-            src={author.image}
-            alt={author.displayName}
-            width={150}
-            height={150}
-            className="rounded-full mb-6"
-          />
-        ) : (
-          <div className="mb-6 text-gray-500">No profile picture</div>
-        )}
-
-        {author.bio ? (
-          <div className="prose mb-8" dangerouslySetInnerHTML={{ __html: author.bio }} />
-        ) : (
-          <p className="text-gray-500">No bio available</p>
-        )}
-
-        <h2 className="text-2xl font-semibold mb-4">Blogs by {author.displayName}</h2>
+        <h2 className="text-2xl font-semibold mb-4">
+          Blogs by {author.displayName}
+        </h2>
 
         {posts.length === 0 ? (
           <p>No posts found for this author.</p>
@@ -51,16 +43,22 @@ export default async function AuthorPage({ params: { id } }: Props) {
           <ul className="space-y-4">
             {posts.map((post) => (
               <li key={post.slug} className="border p-4 rounded">
-                <Link href={`/blog/${post.slug}`} className="text-xl text-blue-600 hover:underline">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="text-xl text-blue-600 hover:underline"
+                >
                   {post.title}
                 </Link>
-                <p className="text-sm text-gray-500">{post.createdDateFormatted}</p>
-                <p className="text-gray-600 text-sm">{post.content.slice(0, 80)}...</p>
+                <p className="text-sm text-gray-500">
+                  {post.createdDateFormatted}
+                </p>
+                <p className="text-gray-600 text-sm">
+                  {post.content.slice(0, 80)}...
+                </p>
               </li>
             ))}
           </ul>
         )}
-
       </div>
     </ProtectedRoute>
   );

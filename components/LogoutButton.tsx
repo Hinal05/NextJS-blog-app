@@ -1,12 +1,17 @@
 'use client';
 import { useRouter } from 'next/navigation';
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  onLogout: () => void;
+};
+
+export function LogoutButton({ onLogout }: LogoutButtonProps) {
   const router = useRouter();
 
   const handleLogout = () => {
     localStorage.removeItem('csrf_token');
-    window.dispatchEvent(new Event('authChanged')); // ✅ notify layout to update
+    window.dispatchEvent(new Event('authChanged'));
+    onLogout();
     router.push('/login');
   };
 
