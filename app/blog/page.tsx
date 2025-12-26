@@ -1,15 +1,9 @@
-import { posts } from "@/library/posts";
 import BlogList from "./BlogList";
-import { fetchPosts } from '@/lib/api';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { fetchPosts } from "@/lib/api";
 
-export const dynamic = "force-dynamic"; // or "force-static" if preferred
+export const revalidate = 60; // ISR
 
 export default async function BlogListPage() {
   const posts = await fetchPosts();
-  return (
-    <ProtectedRoute>
-      <BlogList posts={posts} />
-    </ProtectedRoute>
-  );
+  return <BlogList posts={posts} />;
 }

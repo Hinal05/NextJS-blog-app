@@ -1,5 +1,4 @@
-// app/blog/[slug]/page.tsx
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -7,19 +6,41 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { fetchPosts } from "@/lib/api";
 
 type Props = {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
+  };
 };
 
-// (Optional) Static generation still works
-// export async function generateStaticParams() {
-//   const posts = await fetchPosts();
-//   return posts.map((post) => ({ slug: post.slug }));
-// }
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const posts = await fetchPosts();
+  const post = posts.find((p) => p.slug === params.slug);
+
+  if (!post) return {};
+
+  const description =
+    typeof post.content === "object"
+      ? post.content.value.replace(/<[^>]+>/g, "").slice(0, 160)
+      : "";
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      images: post.image ? [post.image] : [],
+    },
+  };
+}
+
+export async function generateStaticParams() {
+  const posts = await fetchPosts();
+  return posts.map((post) => ({ slug: post.slug }));
+}
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug } = params;
 
   const posts = await fetchPosts();
   const post = posts.find((p) => p.slug === slug);
@@ -43,20 +64,18 @@ export default async function BlogPostPage({ params }: Props) {
       </div>
 
       {post.image && (
-        <Image
+        <img
           src={post.image}
           alt={post.title}
           width={800}
           height={400}
-          loading="lazy"
           className="object-contain w-full max-h-96 mb-6"
-          unoptimized
         />
       )}
 
       <div className="mb-4">
         <p className="text-lg leading-relaxed whitespace-pre-line">
-          {post.content}
+          {post.content?.value}
         </p>
       </div>
 

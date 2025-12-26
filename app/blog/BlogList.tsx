@@ -11,11 +11,14 @@ export default function BlogList({ posts: initialPosts }: { posts: any[] }) {
 
   useEffect(() => {
     const q = searchQuery.toLowerCase();
-    const filtered = posts.filter(
-      (post) =>
-        post.title.toLowerCase().includes(q) ||
-        post.content.toLowerCase().includes(q)
-    );
+
+    const filtered = (posts ?? []).filter((post) => {
+      const title = typeof post.title === "string" ? post.title.toLowerCase() : "";
+      const content = typeof post.field_body?.value === "string" ? post.field_body.value.toLowerCase() : "";
+
+      return title.includes(q) || content.includes(q);
+    });
+
     setFilteredPosts(filtered);
   }, [searchQuery, posts]);
 
@@ -52,7 +55,8 @@ export default function BlogList({ posts: initialPosts }: { posts: any[] }) {
                 />
                 <h3 className="text-lg font-semibold">{post.title}</h3>
                 <p className="text-sm text-gray-600">
-                  {post.content.slice(0, 60)}...
+                  {(post.field_body?.value ?? "").slice(0, 60)}
+                  {post.field_body?.value && post.field_body.value.length > 60 ? "..." : ""}
                 </p>
               </a>
               <p className="text-sm text-gray-600">

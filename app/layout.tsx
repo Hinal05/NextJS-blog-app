@@ -1,61 +1,24 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import './globals.css';
-import { LogoutButton } from '@/components/LogoutButton';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsLoggedIn(!!localStorage.getItem('csrf_token'));
-    };
-
-    checkAuth(); // Initial check
-
-    // const handleStorage = () => {
-    //   setIsLoggedIn(!!localStorage.getItem('csrf_token'));
-    // };
-
-    // handleStorage(); // initial check
-
-    // window.addEventListener('storage', handleStorage);
-    // return () => window.removeEventListener('storage', handleStorage);
-
-    window.addEventListener('authChanged', checkAuth);
-    return () => window.removeEventListener('authChanged', checkAuth);
-  }, []);
-
   return (
     <html lang="en">
       <body>
-        <header>
-          <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-            <ul style={{ listStyle: 'none', display: 'flex', gap: '1rem' }}>
-              {isLoggedIn ? (
-                <>
-                  <li><Link href="/">Home</Link></li>
-                  <li><Link href="/about">About</Link></li>
-                  <li><Link href="/blog">Blog</Link></li>
-                  <li><Link href="/contact">Contact</Link></li>
-                  <li><LogoutButton onLogout={() => setIsLoggedIn(false)} /></li>
-                </>
-              ) : (
-                <>
-                  <li><Link href="/login">Login</Link></li>
-                  <li><Link href="/register">Register</Link></li>
-                </>
-              )}
-            </ul>
+        <header className="border-b">
+          <nav className="max-w-6xl mx-auto flex gap-4 p-4">
+            <Link href="/">Home</Link>
+            <Link href="/blog">Blog</Link>
+            <Link href="/search">Search</Link>
           </nav>
         </header>
 
-        <main style={{ padding: '1rem' }}>{children}</main>
+        <main className="max-w-6xl mx-auto p-4">
+          {children} {/* This renders all page content */}
+        </main>
 
-        <footer style={{ padding: '1rem', borderTop: '1px solid #ccc' }}>
-          <p>© 2025 My Blog</p>
+        <footer className="border-t p-4 text-center text-sm text-gray-500">
+          © 2025 Blog App
         </footer>
       </body>
     </html>

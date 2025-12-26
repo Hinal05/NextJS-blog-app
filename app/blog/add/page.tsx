@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import { createBlogPost } from '@/lib/api';
 
 export default function AddBlogPage() {
   const router = useRouter();
@@ -12,6 +11,7 @@ export default function AddBlogPage() {
     title: '',
     content: '',
     image: '',
+    guestAuthorName: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -22,11 +22,11 @@ export default function AddBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const result = await createBlogPost({
-      title: formData.title,
-      content: formData.content,
-      image: formData.image,
-    });
+    const result = await fetch('/api/blog/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    }).then(r => r.json());
 
     if (result.success) {
       router.push('/blog');
@@ -47,6 +47,15 @@ export default function AddBlogPage() {
           placeholder="Title"
           required
           value={formData.title}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <input
+          type="text"
+          name="guestAuthorName"
+          placeholder="Your Name"
+          required
+          value={formData.guestAuthorName}
           onChange={handleChange}
           className="border p-2 rounded"
         />

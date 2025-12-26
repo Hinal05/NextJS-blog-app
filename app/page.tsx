@@ -1,10 +1,7 @@
-import ProtectedRoute from '@/components/ProtectedRoute';
-
 export default function HomePage() {
   return (
-    <ProtectedRoute>
-      <h1 className="text-2xl font-bold">Welcome to the Home Page</h1>
-      <p>You are logged in 🎉</p>
-    </ProtectedRoute>
+    <section className="max-w-4xl mx-auto p-8">
+      <h1 className="text-3xl font-bold">Welcome to the Blog</h1>
+    </section>
   );
 }
