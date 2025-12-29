@@ -1,73 +1,62 @@
-'use client';
+"use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import type { NormalizedPost } from "@/lib/api";
 
-export default function BlogList({ posts: initialPosts }: { posts: any[] }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredPosts, setFilteredPosts] = useState(initialPosts);
-  const [posts, setPosts] = useState(initialPosts);
+type BlogListProps = {
+  posts: NormalizedPost[];
+};
 
-  useEffect(() => {
-    const q = searchQuery.toLowerCase();
+export default function BlogList({ posts }: BlogListProps) {
+  const [query, setQuery] = useState("");
 
-    const filtered = (posts ?? []).filter((post) => {
-      const title = typeof post.title === "string" ? post.title.toLowerCase() : "";
-      const content = typeof post.field_body?.value === "string" ? post.field_body.value.toLowerCase() : "";
-
-      return title.includes(q) || content.includes(q);
-    });
-
-    setFilteredPosts(filtered);
-  }, [searchQuery, posts]);
+  const filtered = posts.filter(
+    (post) =>
+      post.title.toLowerCase().includes(query.toLowerCase()) ||
+      post.content.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <div className="p-8">
       <Breadcrumbs />
 
-      <h2 className="text-2xl font-bold mb-6">Blog Posts</h2>
-
-      <a href="/blog/add" className="inline-block bg-green-600 text-white px-4 py-2 rounded mb-6 hover:bg-green-700">+ Add New Blog</a>
-
       <input
-        type="text"
+        className="border p-2 w-full mb-6"
         placeholder="Search posts..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 mb-6 border border-gray-300 rounded"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
       />
 
-      {filteredPosts.length === 0 ? (
-        <p>No posts found.</p>
-      ) : (
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
-          {filteredPosts.map((post) => (
-            <div key={post.slug} className="block bg-white p-4 rounded shadow hover:scale-105 transition">
-              <a
-                href={`/blog/${post.slug}`}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+        {filtered.map((post) => (
+          <div
+            key={post.slug}
+            className="bg-white p-4 rounded shadow hover:scale-105 transition"
+          >
+            <Link href={`/blog/${post.slug}`}>
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-40 object-contain mb-4"
+                loading="lazy"
+              />
+              <h3 className="text-lg font-semibold">{post.title}</h3>
+            </Link>
+
+            <p className="text-sm text-gray-600 mt-1">
+              By{" "}
+              <Link
+                href={`/authors/${post.authorId}`}
+                className="text-blue-600 hover:underline"
               >
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  loading="lazy"
-                  className="w-full h-40 object-contain mb-4"
-                />
-                <h3 className="text-lg font-semibold">{post.title}</h3>
-                <p className="text-sm text-gray-600">
-                  {(post.field_body?.value ?? "").slice(0, 60)}
-                  {post.field_body?.value && post.field_body.value.length > 60 ? "..." : ""}
-                </p>
-              </a>
-              <p className="text-sm text-gray-600">
-                <Link href={`/authors/${post.authorId}`} className="text-blue-600 hover:underline">
-                  {post.author}
-                </Link>
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+                {post.author}
+              </Link>
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
